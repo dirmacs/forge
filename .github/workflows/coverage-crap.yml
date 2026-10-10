@@ -59,11 +59,13 @@ jobs:
       # Repo-specific constants, measured on the first run — see the PR that
       # added this job for the numbers and the ratchet.
       #
-      # Measured under tarpaulin 0.37.5 / ptrace on the build host, 21-crate
-      # workspace, 1855 tests all passing: line coverage 52.01% (9463/18194
-      # lines). CI runs the llvm engine; the 3pp margin covers engine
-      # variance, and the ratchet raises the floor on the first green run.
-      COVERAGE_FLOOR: "49"
+      # Measured under tarpaulin 0.37.5 on the build host (ptrace, 21-crate
+      # workspace, 1855 tests all passing): line coverage 52.01% (9463/18194
+      # lines). CI's first real run of this gate (llvm engine, this PR)
+      # measured 50.45% (8709/17263 lines), so the floor is set to 47 =
+      # measured -3pp margin for suite/engine variance; the ratchet raises
+      # it from there.
+      COVERAGE_FLOOR: "47"
       # CRAP ceiling after the ui.rs exclusion below: measured max 3660
       # (Renderer::render_event, crates/forge_markdown_stream/src/renderer.rs:125,
       # CC 60, cov 0%) + ~10% headroom.
