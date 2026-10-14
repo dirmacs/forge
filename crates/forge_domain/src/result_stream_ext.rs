@@ -80,7 +80,8 @@ impl ResultStreamExt<anyhow::Error> for crate::BoxStream<ChatCompletionMessage, 
                     if let Some(content_part) = message.content.as_ref() {
                         let delta = content_part.as_str();
                         if !delta.is_empty() {
-                            // Ignore send errors - the receiver may have been dropped
+                            // Ignore send errors - the receiver may have been
+                            // dropped
                             let _ = sender
                                 .send(Ok(ChatResponse::TaskMessage {
                                     content: ChatResponseContent::Markdown(delta.to_string()),
@@ -92,7 +93,8 @@ impl ResultStreamExt<anyhow::Error> for crate::BoxStream<ChatCompletionMessage, 
                     if let Some(reasoning_part) = message.reasoning.as_ref() {
                         let delta = reasoning_part.as_str();
                         if !delta.is_empty() {
-                            // Ignore send errors - the receiver may have been dropped
+                            // Ignore send errors - the receiver may have been
+                            // dropped
                             let _ = sender
                                 .send(Ok(ChatResponse::TaskReasoning {
                                     content: delta.to_string(),
@@ -106,7 +108,8 @@ impl ResultStreamExt<anyhow::Error> for crate::BoxStream<ChatCompletionMessage, 
                 if let Some(content_part) = message.content.as_ref() {
                     content.push_str(content_part.as_str());
 
-                    // Check for XML tool calls in the content, but only interrupt if flag is set
+                    // Check for XML tool calls in the content, but only
+                    // interrupt if flag is set
                     if should_interrupt_for_xml {
                         // Use match instead of ? to avoid propagating errors
                         if let Some(tool_call) = ToolCallFull::try_from_xml(&content)
@@ -154,8 +157,9 @@ impl ResultStreamExt<anyhow::Error> for crate::BoxStream<ChatCompletionMessage, 
             }
         }
 
-        // Extract all tool calls in a fully declarative way with combined sources
-        // Start with complete tool calls (for non-streaming mode)
+        // Extract all tool calls in a fully declarative way with combined
+        // sources Start with complete tool calls (for non-streaming
+        // mode)
         let initial_tool_calls: Vec<ToolCallFull> = messages
             .iter()
             .flat_map(|message| &message.tool_calls)
@@ -170,8 +174,8 @@ impl ResultStreamExt<anyhow::Error> for crate::BoxStream<ChatCompletionMessage, 
             .collect();
 
         // Process partial tool calls
-        // Convert parse failures to retryable errors so they can be retried by asking
-        // LLM to try again
+        // Convert parse failures to retryable errors so they can be retried by
+        // asking LLM to try again
         let partial_tool_calls = ToolCallFull::try_from_parts(&tool_call_parts)
             .with_context(|| "Failed to parse tool call".to_string())
             .map_err(crate::Error::Retryable)?;
@@ -439,7 +443,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_into_full_with_reasoning() {
-        // Fixture: Create a stream with reasoning content across multiple messages
+        // Fixture: Create a stream with reasoning content across multiple
+        // messages
         let messages = vec![
             Ok(ChatCompletionMessage::default()
                 .content(Content::part("Hello "))
@@ -578,7 +583,8 @@ mod tests {
         // Actual: Convert stream to full message with XML interruption enabled
         let actual = result_stream.into_full(true).await.unwrap();
 
-        // Expected: Should contain the XML tool call and final usage from last message
+        // Expected: Should contain the XML tool call and final usage from last
+        // message
         let expected_final_usage = Usage {
             prompt_tokens: TokenCount::Actual(5),
             completion_tokens: TokenCount::Actual(15),
@@ -594,7 +600,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_into_full_xml_tool_call_no_interruption_when_disabled() {
-        // Fixture: Create a stream with XML tool call content but interruption disabled
+        // Fixture: Create a stream with XML tool call content but interruption
+        // disabled
         let xml_content = r#"<forge_tool_call>
 {"name": "test_tool", "arguments": {"arg": "value"}}
 </forge_tool_call>"#;
@@ -640,7 +647,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_into_full_usage_always_from_last_message_even_without_interruption() {
-        // Fixture: Create a stream where usage progresses through multiple messages
+        // Fixture: Create a stream where usage progresses through multiple
+        // messages
         let messages = vec![
             Ok(ChatCompletionMessage::default().content(Content::part("Starting"))),
             Ok(ChatCompletionMessage::default().content(Content::part(" processing"))),
@@ -660,7 +668,8 @@ mod tests {
         // Actual: Convert stream to full message
         let actual = result_stream.into_full(false).await.unwrap();
 
-        // Expected: Usage should be from the last message (even if it has no content)
+        // Expected: Usage should be from the last message (even if it has no
+        // content)
         let expected = ChatCompletionMessageFull {
             content: "Starting processing complete".to_string(),
             tool_calls: vec![],
@@ -683,7 +692,8 @@ mod tests {
     async fn test_into_full_with_finish_reason() {
         use crate::FinishReason;
 
-        // Fixture: Create a stream with multiple messages, some with finish reasons
+        // Fixture: Create a stream with multiple messages, some with finish
+        // reasons
         let messages = vec![
             Ok(ChatCompletionMessage::default()
                 .content(Content::part("Processing..."))
@@ -800,8 +810,8 @@ mod tests {
         // Actual: Convert stream to full message with XML interruption enabled
         let actual = result_stream.into_full(true).await.unwrap();
 
-        // Expected: Should have XML tool call, content only from before interruption,
-        // but final usage
+        // Expected: Should have XML tool call, content only from before
+        // interruption, but final usage
         assert_eq!(actual.content, xml_content);
         assert_eq!(actual.tool_calls.len(), 1);
         assert_eq!(actual.tool_calls[0].name.as_str(), "test_tool");
@@ -813,8 +823,8 @@ mod tests {
     async fn test_into_full_empty_completion_creates_unparsed_tool_calls() {
         use crate::Error;
 
-        // Fixture: Create a stream with empty content, no tool calls, and no finish
-        // reason
+        // Fixture: Create a stream with empty content, no tool calls, and no
+        // finish reason
         let messages = vec![
             Ok(ChatCompletionMessage::default()), // Completely empty message
             Ok(ChatCompletionMessage::default().content(Content::part(""))), // Empty content

@@ -164,7 +164,8 @@ impl<S: Services> ForgeApp<S> {
                     let conversation = orch.get_conversation().clone();
                     let save_result = services.upsert_conversation(conversation).await;
 
-                    // Send any error to the stream (prioritize dispatch error over save error)
+                    // Send any error to the stream (prioritize dispatch error
+                    // over save error)
                     #[allow(clippy::collapsible_if)]
                     if let Some(err) = dispatch_result.err().or(save_result.err()) {
                         if let Err(e) = tx.send(Err(err)).await {

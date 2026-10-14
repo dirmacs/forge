@@ -30,8 +30,8 @@ impl InputCompleter {
 impl Completer for InputCompleter {
     fn complete(&mut self, line: &str, pos: usize) -> Vec<Suggestion> {
         if line.starts_with("/") {
-            // if the line starts with '/' it's probably a command, so we delegate to the
-            // command completer.
+            // if the line starts with '/' it's probably a command, so we
+            // delegate to the command completer.
             let result = self.command.complete(line, pos);
             if !result.is_empty() {
                 return result;
@@ -158,7 +158,8 @@ mod tests {
         // Test that better matches come first
         let actual = completer.complete("@config", 7);
 
-        // config.rs should rank higher than another_config.toml for "config" query
+        // config.rs should rank higher than another_config.toml for "config"
+        // query
         assert!(actual.len() >= 2);
         let first_match = &actual[0];
         assert!(

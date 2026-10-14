@@ -211,7 +211,8 @@ impl<F: forge_app::FileWriterInfra + 'static> ForgeHttpInfra<F> {
             let body_clone = body.clone();
             let debug_path = debug_path.clone();
             tokio::spawn(async move {
-                // Use debug_path if parent dir can be created, otherwise use fallback
+                // Use debug_path if parent dir can be created, otherwise use
+                // fallback
                 let _ = file_writer.write(&debug_path, body_clone).await;
             });
         }

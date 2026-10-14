@@ -76,53 +76,55 @@ impl<S: AttachmentService> UserPromptGenerator<S> {
         let event_value = self.event.value.clone();
         let template_engine = TemplateEngine::default();
 
-        let content =
-            if let Some(user_prompt) = &self.agent.user_prompt
-                && self.event.value.is_some()
-            {
-                let user_input = self
-                    .event
-                    .value
-                    .as_ref()
-                    .and_then(|v| v.as_user_prompt().map(|u| u.as_str().to_string()))
-                    .unwrap_or_default();
-                let mut event_context = EventContext::new(EventContextValue::new(user_input))
-                    .current_date(self.current_time.format("%Y-%m-%d").to_string());
+        let content = if let Some(user_prompt) = &self.agent.user_prompt
+            && self.event.value.is_some()
+        {
+            let user_input = self
+                .event
+                .value
+                .as_ref()
+                .and_then(|v| v.as_user_prompt().map(|u| u.as_str().to_string()))
+                .unwrap_or_default();
+            let mut event_context = EventContext::new(EventContextValue::new(user_input))
+                .current_date(self.current_time.format("%Y-%m-%d").to_string());
 
-                // Check if context already contains user messages to determine if it's feedback
-                let has_user_messages = context.messages.iter().any(|msg| msg.has_role(Role::User));
+            // Check if context already contains user messages to determine if
+            // it's feedback
+            let has_user_messages = context.messages.iter().any(|msg| msg.has_role(Role::User));
 
-                if has_user_messages {
-                    event_context = event_context.into_feedback();
-                } else {
-                    event_context = event_context.into_task();
+            if has_user_messages {
+                event_context = event_context.into_feedback();
+            } else {
+                event_context = event_context.into_task();
+            }
+
+            debug!(event_context = ?event_context, "Event context");
+
+            // Render the command first.
+            let event_context = match self.event.value.as_ref().and_then(|v| v.as_command()) {
+                Some(command) => {
+                    let rendered_prompt = template_engine.render_template(
+                        command.template.clone(),
+                        &json!({"parameters": command.parameters.join(" ")}),
+                    )?;
+                    event_context.event(EventContextValue::new(rendered_prompt))
                 }
+                None => event_context,
+            };
 
-                debug!(event_context = ?event_context, "Event context");
-
-                // Render the command first.
-                let event_context = match self.event.value.as_ref().and_then(|v| v.as_command()) {
-                    Some(command) => {
-                        let rendered_prompt = template_engine.render_template(
-                            command.template.clone(),
-                            &json!({"parameters": command.parameters.join(" ")}),
-                        )?;
-                        event_context.event(EventContextValue::new(rendered_prompt))
-                    }
-                    None => event_context,
-                };
-
-                // Render the event value into agent's user prompt template.
-                Some(template_engine.render_template(
+            // Render the event value into agent's user prompt template.
+            Some(
+                template_engine.render_template(
                     Template::new(user_prompt.template.as_str()),
                     &event_context,
-                )?)
-            } else {
-                // Use the raw event value as content if no user_prompt is provided
-                event_value
-                    .as_ref()
-                    .and_then(|v| v.as_user_prompt().map(|p| p.deref().to_owned()))
-            };
+                )?,
+            )
+        } else {
+            // Use the raw event value as content if no user_prompt is provided
+            event_value
+                .as_ref()
+                .and_then(|v| v.as_user_prompt().map(|p| p.deref().to_owned()))
+        };
 
         if let Some(content) = &content {
             // Create User Message
@@ -156,7 +158,8 @@ impl<S: AttachmentService> UserPromptGenerator<S> {
         // Track file attachments as read operations in metrics
         let mut metrics = conversation.metrics.clone();
         for attachment in &attachments {
-            // Only track file content attachments (not images or directory listings)
+            // Only track file content attachments (not images or directory
+            // listings)
             if let AttachmentContent::FileContent { content, .. } = &attachment.content {
                 let content_hash = crate::utils::compute_hash(content);
                 metrics = metrics.insert(
@@ -387,7 +390,8 @@ mod tests {
             "file2.rs should have content hash"
         );
 
-        // Verify both files are in files_accessed (since they are Read operations)
+        // Verify both files are in files_accessed (since they are Read
+        // operations)
         assert!(
             actual.metrics.files_accessed.contains("/test/file1.rs"),
             "file1.rs should be in files_accessed"

@@ -288,7 +288,8 @@ mod tests {
         service.set_default_provider(ProviderId::OPENAI).await?;
 
         // Should return the provider ID even if provider is not available
-        // Validation happens when getting the actual provider via ProviderService
+        // Validation happens when getting the actual provider via
+        // ProviderService
         let result = service.get_default_provider().await?;
 
         assert_eq!(result, ProviderId::OPENAI);

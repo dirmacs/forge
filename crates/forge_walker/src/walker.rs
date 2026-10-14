@@ -167,7 +167,8 @@ impl Walker {
                 break 'walk_loop;
             }
 
-            // Check if we've hit the file count limit (only count non-directories)
+            // Check if we've hit the file count limit (only count
+            // non-directories)
             if !is_dir {
                 file_count += 1;
                 if file_count > self.max_files {

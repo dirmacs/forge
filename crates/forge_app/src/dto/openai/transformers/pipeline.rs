@@ -31,8 +31,8 @@ impl Transformer for ProviderPipeline<'_> {
         // ref: https://openrouter.ai/docs/features/prompt-caching
         let provider = self.0;
 
-        // Z.ai transformer must run before MakeOpenAiCompat which removes reasoning
-        // field
+        // Z.ai transformer must run before MakeOpenAiCompat which removes
+        // reasoning field
         let zai_thinking = SetZaiThinking.when(move |_| is_zai_provider(provider));
 
         let or_transformers = DefaultTransformation::<Request>::new()

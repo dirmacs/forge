@@ -257,8 +257,8 @@ pub fn setup_zsh_integration(
         }
         MarkerState::NotFound => {
             // No markers - add them at the end
-            // Add blank line before markers if file is not empty and doesn't end with blank
-            // line
+            // Add blank line before markers if file is not empty and doesn't
+            // end with blank line
             if !lines.is_empty() && !lines[lines.len() - 1].trim().is_empty() {
                 lines.push(String::new());
             }
@@ -328,8 +328,8 @@ mod tests {
                 // Success case
             }
             Err(e) => {
-                // Check if it's a non-zero exit code error or zsh not available (both expected
-                // in tests)
+                // Check if it's a non-zero exit code error or zsh not available
+                // (both expected in tests)
                 let error_msg = e.to_string();
                 assert!(
                     error_msg.contains("exit code") || error_msg.contains("Failed to execute"),

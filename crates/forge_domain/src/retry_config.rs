@@ -50,7 +50,8 @@ impl Default for RetryConfig {
 }
 
 impl RetryConfig {
-    // Implementation moved to forge_app::retry module to avoid backon dependency
+    // Implementation moved to forge_app::retry module to avoid backon
+    // dependency
 }
 
 #[cfg(test)]

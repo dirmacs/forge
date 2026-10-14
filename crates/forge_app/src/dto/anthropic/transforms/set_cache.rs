@@ -24,15 +24,15 @@ impl Transformer for SetCache {
             return request;
         }
 
-        // Cache the very first system message, ideally you should keep static content
-        // in it.
+        // Cache the very first system message, ideally you should keep static
+        // content in it.
         if let Some(system_messages) = request.system.as_mut()
             && let Some(first_message) = system_messages.first_mut()
         {
             *first_message = std::mem::take(first_message).cached(true);
         } else {
-            // If no system messages, we can still cache the first message in the
-            // conversation.
+            // If no system messages, we can still cache the first message in
+            // the conversation.
             if let Some(first_message) = request.get_messages_mut().first_mut() {
                 *first_message = std::mem::take(first_message).cached(true);
             }
@@ -62,7 +62,8 @@ mod tests {
     ) -> String {
         let mut messages = Vec::new();
 
-        // Add system messages to the regular messages array for Anthropic format
+        // Add system messages to the regular messages array for Anthropic
+        // format
         for c in system_messages.chars() {
             match c {
                 's' => messages.push(
@@ -216,8 +217,8 @@ mod tests {
 
     #[test]
     fn test_multiple_system_messages_only_first_cached() {
-        // This test assumes multiple system messages are possible, but only first is
-        // cached
+        // This test assumes multiple system messages are possible, but only
+        // first is cached
         let context = Context {
             conversation_id: None,
             messages: vec![

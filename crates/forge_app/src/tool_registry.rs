@@ -72,7 +72,8 @@ impl<S: Services> ToolRegistry<S> {
         if let Some(operation) = operation {
             let decision = self.services.check_operation_permission(&operation).await?;
 
-            // Send custom policy message to the user when a policy file was created
+            // Send custom policy message to the user when a policy file was
+            // created
             if let Some(policy_path) = decision.path {
                 use forge_domain::TitleFormat;
 
@@ -110,8 +111,9 @@ impl<S: Services> ToolRegistry<S> {
                 context.send(content).await?;
             }
 
-            // Check permissions before executing the tool (only in restricted mode)
-            // This is done BEFORE the timeout to ensure permissions are never timed out
+            // Check permissions before executing the tool (only in restricted
+            // mode) This is done BEFORE the timeout to ensure
+            // permissions are never timed out
             if self.services.is_restricted()
                 && self.check_tool_permission(&tool_input, context).await?
             {
@@ -241,7 +243,8 @@ impl<S> ToolRegistry<S> {
         // Build tool_names map from all available tools
         let tool_names: Map<String, Value> = ToolCatalog::iter()
             .filter(|tool| {
-                // Only include tools that are supported (filter sem_search if not supported)
+                // Only include tools that are supported (filter sem_search if
+                // not supported)
                 if matches!(tool, ToolCatalog::SemSearch(_)) {
                     sem_search_supported
                 } else {
@@ -534,9 +537,9 @@ mod tests {
         let actual =
             ToolRegistry::<()>::validate_tool_call(&fixture, &ToolName::new("tool_[special]"));
 
-        // The glob pattern "tool_[special]" will match "tool_s", "tool_p", etc., not
-        // the literal string So this test verifies that exact matching doesn't
-        // work when the pattern is a valid glob
+        // The glob pattern "tool_[special]" will match "tool_s", "tool_p",
+        // etc., not the literal string So this test verifies that exact
+        // matching doesn't work when the pattern is a valid glob
         assert!(actual.is_err());
     }
 
@@ -900,7 +903,8 @@ fn test_all_rendered_tool_descriptions() {
     }
 
     // Snapshot all rendered tool descriptions for visual verification
-    // This will fail if a tool is renamed and descriptions reference the old name
+    // This will fail if a tool is renamed and descriptions reference the old
+    // name
     let all_descriptions: Vec<_> = tools
         .iter()
         .map(|t| format!("### {}\n\n{}\n", t.name, t.description))

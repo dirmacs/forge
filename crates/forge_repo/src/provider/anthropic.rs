@@ -154,6 +154,87 @@ impl<T: HttpInfra> Anthropic<T> {
     }
 }
 
+/// Repository for Anthropic provider responses
+#[derive(Setters)]
+#[setters(strip_option, into)]
+pub struct AnthropicResponseRepository<F> {
+    infra: Arc<F>,
+    retry_config: Arc<RetryConfig>,
+}
+
+impl<F> AnthropicResponseRepository<F> {
+    pub fn new(infra: Arc<F>) -> Self {
+        Self { infra, retry_config: Arc::new(RetryConfig::default()) }
+    }
+}
+
+impl<F: HttpInfra> AnthropicResponseRepository<F> {
+    /// Creates an Anthropic client from a provider configuration
+    fn create_client(&self, provider: &Provider<Url>) -> anyhow::Result<Anthropic<F>> {
+        let chat_url = provider.url.clone();
+        let models = provider
+            .models
+            .clone()
+            .context("Anthropic requires models configuration")?;
+        let creds = provider
+            .credential
+            .as_ref()
+            .context("Anthropic provider requires credentials")?
+            .auth_details
+            .clone();
+
+        let (key, is_oauth) = match creds {
+            forge_domain::AuthDetails::ApiKey(api_key) => (api_key.as_str().to_string(), false),
+            forge_domain::AuthDetails::OAuth { tokens, .. } => {
+                (tokens.access_token.as_str().to_string(), true)
+            }
+            _ => anyhow::bail!("Unsupported authentication method for Anthropic provider"),
+        };
+
+        Ok(Anthropic::new(
+            self.infra.clone(),
+            key,
+            chat_url,
+            models,
+            "2023-06-01".to_string(),
+            is_oauth,
+        ))
+    }
+}
+
+#[async_trait::async_trait]
+impl<F: HttpInfra + 'static> ChatRepository for AnthropicResponseRepository<F> {
+    async fn chat(
+        &self,
+        model_id: &ModelId,
+        context: Context,
+        provider: Provider<Url>,
+    ) -> ResultStream<ChatCompletionMessage, anyhow::Error> {
+        let retry_config = self.retry_config.clone();
+        let provider_client = self.create_client(&provider)?;
+
+        let stream = provider_client
+            .chat(model_id, context)
+            .await
+            .map_err(|e| into_retry(e, &retry_config))?;
+
+        Ok(Box::pin(stream.map(move |item| {
+            item.map_err(|e| into_retry(e, &retry_config))
+        })))
+    }
+
+    async fn models(&self, provider: Provider<Url>) -> anyhow::Result<Vec<Model>> {
+        let retry_config = self.retry_config.clone();
+        let provider_client = self.create_client(&provider)?;
+
+        provider_client
+            .models()
+            .await
+            .map_err(|e| into_retry(e, &retry_config))
+            .context("Failed to fetch models from Anthropic provider")
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -209,7 +290,8 @@ mod tests {
             _headers: Option<HeaderMap>,
             _body: Bytes,
         ) -> anyhow::Result<EventSource> {
-            // For now, return an error since eventsource is not used in the failing tests
+            // For now, return an error since eventsource is not used in the
+            // failing tests
             Err(anyhow::anyhow!("EventSource not implemented in mock"))
         }
     }
@@ -383,86 +465,5 @@ mod tests {
         mock.assert_async().await;
         assert!(actual.is_empty());
         Ok(())
-    }
-}
-
-/// Repository for Anthropic provider responses
-#[derive(Setters)]
-#[setters(strip_option, into)]
-pub struct AnthropicResponseRepository<F> {
-    infra: Arc<F>,
-    retry_config: Arc<RetryConfig>,
-}
-
-impl<F> AnthropicResponseRepository<F> {
-    pub fn new(infra: Arc<F>) -> Self {
-        Self { infra, retry_config: Arc::new(RetryConfig::default()) }
-    }
-}
-
-impl<F: HttpInfra> AnthropicResponseRepository<F> {
-    /// Creates an Anthropic client from a provider configuration
-    fn create_client(&self, provider: &Provider<Url>) -> anyhow::Result<Anthropic<F>> {
-        let chat_url = provider.url.clone();
-        let models = provider
-            .models
-            .clone()
-            .context("Anthropic requires models configuration")?;
-        let creds = provider
-            .credential
-            .as_ref()
-            .context("Anthropic provider requires credentials")?
-            .auth_details
-            .clone();
-
-        let (key, is_oauth) = match creds {
-            forge_domain::AuthDetails::ApiKey(api_key) => (api_key.as_str().to_string(), false),
-            forge_domain::AuthDetails::OAuth { tokens, .. } => {
-                (tokens.access_token.as_str().to_string(), true)
-            }
-            _ => anyhow::bail!("Unsupported authentication method for Anthropic provider"),
-        };
-
-        Ok(Anthropic::new(
-            self.infra.clone(),
-            key,
-            chat_url,
-            models,
-            "2023-06-01".to_string(),
-            is_oauth,
-        ))
-    }
-}
-
-#[async_trait::async_trait]
-impl<F: HttpInfra + 'static> ChatRepository for AnthropicResponseRepository<F> {
-    async fn chat(
-        &self,
-        model_id: &ModelId,
-        context: Context,
-        provider: Provider<Url>,
-    ) -> ResultStream<ChatCompletionMessage, anyhow::Error> {
-        let retry_config = self.retry_config.clone();
-        let provider_client = self.create_client(&provider)?;
-
-        let stream = provider_client
-            .chat(model_id, context)
-            .await
-            .map_err(|e| into_retry(e, &retry_config))?;
-
-        Ok(Box::pin(stream.map(move |item| {
-            item.map_err(|e| into_retry(e, &retry_config))
-        })))
-    }
-
-    async fn models(&self, provider: Provider<Url>) -> anyhow::Result<Vec<Model>> {
-        let retry_config = self.retry_config.clone();
-        let provider_client = self.create_client(&provider)?;
-
-        provider_client
-            .models()
-            .await
-            .map_err(|e| into_retry(e, &retry_config))
-            .context("Failed to fetch models from Anthropic provider")
     }
 }

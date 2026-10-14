@@ -98,10 +98,10 @@ impl Compactor {
         // chains. After compaction, this consistency can break if the first
         // remaining assistant lacks reasoning.
         //
-        // Solution: Extract the LAST reasoning from compacted messages and inject it
-        // into the first assistant message after compaction. This preserves
-        // chain continuity while preventing exponential accumulation across
-        // multiple compactions.
+        // Solution: Extract the LAST reasoning from compacted messages and
+        // inject it into the first assistant message after compaction.
+        // This preserves chain continuity while preventing exponential
+        // accumulation across multiple compactions.
         //
         // Example: [U, A+r, U, A+r, U, A] → compact → [U-summary, A+r, U, A]
         //                                                          └─from last
@@ -260,7 +260,8 @@ mod tests {
 
         let context = compactor.compress_single_sequence(context, (0, 2)).unwrap();
 
-        // Verify reasoning didn't accumulate - should still be just 1 reasoning block
+        // Verify reasoning didn't accumulate - should still be just 1 reasoning
+        // block
         let first_assistant = context
             .messages
             .iter()
@@ -289,7 +290,8 @@ mod tests {
             ..Default::default()
         }];
 
-        // Most recent message in range has empty reasoning, earlier has non-empty
+        // Most recent message in range has empty reasoning, earlier has
+        // non-empty
         let context = Context::default()
             .add_message(ContextMessage::user("M1", None))
             .add_message(ContextMessage::assistant(

@@ -36,7 +36,8 @@ impl Transformer for ReasoningNormalizer {
             context.reasoning = None;
         }
 
-        // If first_assistant_has_reasoning is true, we keep all reasoning details as-is
+        // If first_assistant_has_reasoning is true, we keep all reasoning
+        // details as-is
 
         context
     }
@@ -118,7 +119,8 @@ mod tests {
         let mut transformer = ReasoningNormalizer;
         let actual = transformer.transform(fixture.clone());
 
-        // All reasoning details should be preserved since first assistant has reasoning
+        // All reasoning details should be preserved since first assistant has
+        // reasoning
         let snapshot =
             TransformationSnapshot::new("ReasoningNormalizer_first_has_reasoning", fixture, actual);
         assert_yaml_snapshot!(snapshot);

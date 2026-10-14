@@ -134,7 +134,8 @@ where
                 Ok(_) => {}
                 Err(error) => {
                     // Format error with full chain for detailed diagnostics
-                    // Using Debug formatting with alternate flag shows the full error chain
+                    // Using Debug formatting with alternate flag shows the full
+                    // error chain
                     let error_string = format!("{error:?}");
                     self.failed_servers
                         .write()

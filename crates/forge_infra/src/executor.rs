@@ -196,7 +196,8 @@ async fn stream<A: AsyncReadExt + Unpin, W: Write>(
                 break;
             }
             writer.write_all(&buff[..n])?;
-            // note: flush is necessary else we get the cursor could not be found error.
+            // note: flush is necessary else we get the cursor could not be
+            // found error.
             writer.flush()?;
             output.extend_from_slice(&buff[..n]);
         }

@@ -261,7 +261,8 @@ where
         let staged_diff = staged_diff.context("Failed to get staged changes")?;
         let unstaged_diff = unstaged_diff.context("Failed to get unstaged changes")?;
 
-        // Use staged changes if available, otherwise fall back to unstaged changes
+        // Use staged changes if available, otherwise fall back to unstaged
+        // changes
         let has_staged_files = !staged_diff.output.stdout.trim().is_empty();
         let diff_output = if has_staged_files {
             staged_diff

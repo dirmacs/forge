@@ -19,7 +19,8 @@ impl Completer for CommandCompleter {
             .list()
             .into_iter()
             .filter_map(|cmd| {
-                // For command completion, we want to show commands with `/` prefix
+                // For command completion, we want to show commands with `/`
+                // prefix
                 let display_name = if cmd.name.starts_with('!') {
                     // Shell commands already have the `!` prefix
                     cmd.name.clone()

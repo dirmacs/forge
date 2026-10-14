@@ -49,8 +49,8 @@ impl<R: AgentRepository + AppConfigRepository + ProviderRepository> ForgeAgentRe
         // Not loaded yet, acquire write lock and load
         let mut agents_write = self.agents.write().await;
 
-        // Double-check in case another task loaded while we were waiting for write
-        // lock
+        // Double-check in case another task loaded while we were waiting for
+        // write lock
         if let Some(agents) = agents_write.as_ref() {
             return Ok(agents.clone());
         }

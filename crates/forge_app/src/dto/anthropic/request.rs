@@ -183,7 +183,8 @@ impl TryFrom<ContextMessage> for Message {
                     forge_domain::Role::User => Message { role: Role::User, content },
                     forge_domain::Role::Assistant => Message { role: Role::Assistant, content },
                     forge_domain::Role::System => {
-                        // note: Anthropic doesn't support system role messages and they're already
+                        // note: Anthropic doesn't support system role messages
+                        // and they're already
                         // filtered out. so this state is unreachable.
                         return Err(
                             forge_domain::Error::UnsupportedRole("System".to_string()).into()
@@ -208,7 +209,8 @@ impl Message {
             *content = std::mem::take(content).cached(false);
         }
 
-        // If enabling cache, set cache control on the last cacheable content item
+        // If enabling cache, set cache control on the last cacheable content
+        // item
         if enable_cache
             && let Some(last_cacheable_idx) =
                 self.content
