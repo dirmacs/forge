@@ -973,7 +973,8 @@ mod tests {
     fn test_coerce_string_integers_to_i32() {
         use crate::{ToolCallArguments, ToolCallFull};
 
-        // Simulate the exact error case: read tool with string integers instead of i32
+        // Simulate the exact error case: read tool with string integers instead
+        // of i32
         let tool_call = ToolCallFull {
             name: ToolName::new("read"),
             call_id: None,

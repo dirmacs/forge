@@ -107,8 +107,8 @@ impl ToolCallFull {
         let mut current_arguments = String::new();
 
         for part in parts.iter() {
-            // If we encounter a new call_id that's different from the current one,
-            // finalize the previous tool call
+            // If we encounter a new call_id that's different from the current
+            // one, finalize the previous tool call
             if let Some(new_call_id) = &part.call_id {
                 if let Some(ref existing_call_id) = current_call_id
                     && existing_call_id.as_str() != new_call_id.as_str()
@@ -166,8 +166,9 @@ impl ToolCallFull {
                         args: content.to_string(),
                     })?;
 
-                // User might switch the model from a tool unsupported to tool supported model
-                // leaving a lot of messages without tool calls
+                // User might switch the model from a tool unsupported to tool
+                // supported model leaving a lot of messages
+                // without tool calls
 
                 tool_call.call_id = Some(ToolCallId::generate());
                 Ok(vec![tool_call])
@@ -400,8 +401,8 @@ mod tests {
     fn test_tool_in_both_failed_and_succeeded_lists() {
         let read = &ToolName::new("READ");
         let mut counter = ToolErrorTracker::new(3);
-        // Tool appears in both failed and succeeded - success should NOT reset due to
-        // filter
+        // Tool appears in both failed and succeeded - success should NOT reset
+        // due to filter
         counter.adjust(&[read], &[read]);
 
         let actual = counter.maxed_out_tools();
@@ -517,8 +518,8 @@ mod tests {
     }
     #[test]
     fn test_try_from_parts_handles_empty_tool_names() {
-        // Fixture: Tool call parts where empty names in subsequent parts should not
-        // override valid names
+        // Fixture: Tool call parts where empty names in subsequent parts should
+        // not override valid names
         let input = [
             ToolCallPart {
                 call_id: Some(ToolCallId("0".to_string())),

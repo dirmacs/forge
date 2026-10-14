@@ -66,8 +66,8 @@ mod tests {
         F: FnOnce(),
     {
         // Set the environment variable
-        // SAFETY: This is only used in single-threaded tests and cleaned up immediately
-        // after
+        // SAFETY: This is only used in single-threaded tests and cleaned up
+        // immediately after
         unsafe {
             env::set_var(key, value);
         }
@@ -113,9 +113,9 @@ mod tests {
     #[test]
     fn test_should_install_when_in_vscode() {
         with_env_var("TERM_PROGRAM", "vscode", || {
-            // We can't reliably test the actual installation check since it depends
-            // on the actual VS Code installation, but we can verify the logic
-            // when in VS Code terminal
+            // We can't reliably test the actual installation check since it
+            // depends on the actual VS Code installation, but we
+            // can verify the logic when in VS Code terminal
             assert!(is_vscode_terminal());
         });
     }

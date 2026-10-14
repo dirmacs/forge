@@ -51,8 +51,9 @@ impl FromDomain<ReasoningConfig> for oai::Reasoning {
             builder.summary(oai::ReasoningSummary::Auto);
         }
 
-        // Note: max_tokens is not supported in the OpenAI Responses API's ReasoningArgs
-        // It's controlled at the request level via max_output_tokens
+        // Note: max_tokens is not supported in the OpenAI Responses API's
+        // ReasoningArgs It's controlled at the request level via
+        // max_output_tokens
 
         builder.build().map_err(anyhow::Error::from)
     }
@@ -75,13 +76,15 @@ fn normalize_openai_json_schema(schema: &mut serde_json::Value) {
                     );
                 }
 
-                // OpenAI requires this field to exist and be `false` for objects.
+                // OpenAI requires this field to exist and be `false` for
+                // objects.
                 map.insert(
                     "additionalProperties".to_string(),
                     serde_json::Value::Bool(false),
                 );
 
-                // OpenAI requires `required` to exist and include every property key.
+                // OpenAI requires `required` to exist and include every
+                // property key.
                 let required_keys = map
                     .get("properties")
                     .and_then(|value| value.as_object())
@@ -122,8 +125,8 @@ fn codex_tool_parameters(
     let mut params =
         serde_json::to_value(schema).with_context(|| "Failed to serialize tool schema")?;
 
-    // The Responses API performs strict JSON Schema validation for tools; normalize
-    // schemars output into the subset OpenAI accepts.
+    // The Responses API performs strict JSON Schema validation for tools;
+    // normalize schemars output into the subset OpenAI accepts.
     normalize_openai_json_schema(&mut params);
 
     Ok(params)
@@ -263,9 +266,9 @@ impl FromDomain<ChatContext> for oai::CreateResponse {
             builder.temperature(temperature.value());
         }
 
-        // Some OpenAI Codex/"reasoning" models reject `top_p` entirely (even when set
-        // to defaults). To avoid hard failures, we currently omit it for the
-        // Responses API path.
+        // Some OpenAI Codex/"reasoning" models reject `top_p` entirely (even
+        // when set to defaults). To avoid hard failures, we currently
+        // omit it for the Responses API path.
 
         if let Some(tools) = tools {
             builder.tools(tools);
@@ -744,8 +747,8 @@ mod tests {
             anyhow::bail!("Expected items input");
         };
 
-        // Should only have user message, function call, and function call output
-        // Empty assistant message should be skipped
+        // Should only have user message, function call, and function call
+        // output Empty assistant message should be skipped
         assert_eq!(items.len(), 3);
 
         Ok(())

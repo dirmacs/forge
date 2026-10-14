@@ -358,8 +358,8 @@ impl Sink for ContextSink {
     type Error = std::io::Error;
 
     fn matched(&mut self, _searcher: &Searcher, mat: &SinkMatch<'_>) -> Result<bool, Self::Error> {
-        // If we have a pending match, save it first (it's now complete with all after
-        // context)
+        // If we have a pending match, save it first (it's now complete with all
+        // after context)
         if let Some((line_num, line)) = self.current_match.take() {
             self.matches.push(Match {
                 path: self.path.clone(),
@@ -380,8 +380,8 @@ impl Sink for ContextSink {
             self.current_after_context.clear();
         }
 
-        // Store the current match (before_context is already accumulated, after_context
-        // will be added via context() calls)
+        // Store the current match (before_context is already accumulated,
+        // after_context will be added via context() calls)
         let line_num = mat.line_number().unwrap_or(0) as usize;
         let line = String::from_utf8_lossy(mat.bytes()).trim_end().to_string();
         self.current_match = Some((line_num, line));

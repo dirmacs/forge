@@ -863,7 +863,8 @@ mod tests {
         async fn list(&self) -> Result<Vec<Workspace>> {
             let mut workspaces = Vec::new();
 
-            // Return all workspaces for the user (repository doesn't filter by path)
+            // Return all workspaces for the user (repository doesn't filter by
+            // path)
             if let Some(workspace) = &self.workspace {
                 workspaces.push(workspace.clone());
             }
@@ -890,7 +891,8 @@ mod tests {
     #[async_trait]
     impl WorkspaceIndexRepository for MockInfra {
         async fn authenticate(&self) -> Result<WorkspaceAuth> {
-            // Mock authentication - return user_id from workspace or ancestor_workspace
+            // Mock authentication - return user_id from workspace or
+            // ancestor_workspace
             let user_id = self
                 .workspace
                 .as_ref()
@@ -1031,8 +1033,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_sync_filters_non_source_files() {
-        // Setup with various file types - source and text files should be synced,
-        // binaries filtered
+        // Setup with various file types - source and text files should be
+        // synced, binaries filtered
         let mut files = HashMap::new();
         files.insert("source.rs".to_string(), "fn main() {}".to_string());
         files.insert("image.png".to_string(), "binary content".to_string());
@@ -1056,8 +1058,9 @@ mod tests {
         // Consume the stream
         while stream.next().await.is_some() {}
 
-        // source.rs and readme.md should be uploaded (both have allowed extensions)
-        // image.png and document.pdf should be filtered (not in allowed extensions)
+        // source.rs and readme.md should be uploaded (both have allowed
+        // extensions) image.png and document.pdf should be filtered
+        // (not in allowed extensions)
         let uploaded = mock.uploaded_files.lock().await;
         assert_eq!(uploaded.len(), 2);
         assert!(uploaded.contains(&"source.rs".into()));
@@ -1268,8 +1271,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_workspace_status_with_modifications() {
-        // Setup: local has file1.rs and file2.rs (modified), server has file1.rs and
-        // file3.rs
+        // Setup: local has file1.rs and file2.rs (modified), server has
+        // file1.rs and file3.rs
         let mock = MockInfra {
             files: [
                 ("file1.rs".to_string(), "content of file1.rs".to_string()),
@@ -1393,7 +1396,8 @@ mod tests {
 
         let service = ForgeWorkspaceService::new(Arc::new(mock.clone()));
 
-        // Sync from current directory (which should match the parent workspace exactly)
+        // Sync from current directory (which should match the parent workspace
+        // exactly)
         let mut stream = service.sync_workspace(current_dir, 20).await.unwrap();
 
         // Collect all events
@@ -1668,7 +1672,8 @@ mod tests {
         std::fs::remove_dir_all(&temp_dir).ok();
     }
 
-    // Tests for find_workspace_by_path business logic (moved from repository layer)
+    // Tests for find_workspace_by_path business logic (moved from repository
+    // layer)
 
     #[tokio::test]
     async fn test_find_workspace_by_path_returns_exact_match() {
@@ -1859,7 +1864,8 @@ mod tests {
 
         let service = ForgeWorkspaceService::new(Arc::new(mock));
 
-        // Query from child - should find closest ancestor (parent, not grandparent)
+        // Query from child - should find closest ancestor (parent, not
+        // grandparent)
         let actual = service
             .find_workspace_by_path(child_path, &user_id)
             .await
@@ -1938,7 +1944,8 @@ mod tests {
 
         let service = ForgeWorkspaceService::new(Arc::new(mock));
 
-        // Query directory with similar prefix - should not match (pro vs project)
+        // Query directory with similar prefix - should not match (pro vs
+        // project)
         let actual = service
             .find_workspace_by_path(long_path, &user_id)
             .await

@@ -35,7 +35,8 @@ fn test_regex_single_slash() {
 #[test]
 fn test_regex_with_backslash_slash() {
     // Test regex with escaped slash at the end
-    // parse_regex treats the regex as a string literal, so backslash is preserved
+    // parse_regex treats the regex as a string literal, so backslash is
+    // preserved
     let fixture = r#"/a\/"#;
     let actual = json_repair::<serde_json::Value>(fixture).unwrap();
     let expected = serde_json::json!(r#"/a\/"#);

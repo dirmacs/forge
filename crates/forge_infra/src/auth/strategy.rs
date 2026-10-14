@@ -365,7 +365,8 @@ async fn refresh_oauth_credential(
             )
         } else {
             // No refresh token - use the existing long-lived OAuth access token
-            // This is typical for GitHub Copilot where the OAuth token is long-lived
+            // This is typical for GitHub Copilot where the OAuth token is
+            // long-lived
             tracing::debug!("No refresh token available, using existing OAuth access token");
             (
                 tokens.access_token.to_string(),
@@ -684,7 +685,8 @@ impl StrategyFactory for ForgeAuthStrategyFactory {
                 )))
             }
             forge_domain::AuthMethod::OAuthDevice(config) => {
-                // Check if this is OAuth-with-API-Key flow (GitHub Copilot pattern)
+                // Check if this is OAuth-with-API-Key flow (GitHub Copilot
+                // pattern)
                 if config.token_refresh_url.is_some() {
                     Ok(AnyAuthStrategy::OAuthWithApiKey(
                         OAuthWithApiKeyStrategy::new(provider_id, config)?,

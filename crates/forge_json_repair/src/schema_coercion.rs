@@ -235,8 +235,8 @@ fn try_parse_json_string(s: &str) -> Result<Value, serde_json::Error> {
         return Ok(parsed);
     }
 
-    // If that fails, try parsing as JSON5 (handles single quotes, comments, etc.)
-    // Convert serde_json5::Error to serde_json::Error
+    // If that fails, try parsing as JSON5 (handles single quotes, comments,
+    // etc.) Convert serde_json5::Error to serde_json::Error
     serde_json5::from_str::<Value>(s).map_err(|e| serde_json::Error::custom(e.to_string()))
 }
 
@@ -522,7 +522,8 @@ mod tests {
 
     #[test]
     fn test_read_tool_line_numbers() {
-        // Simulate the exact case from the task: read tool with string line numbers
+        // Simulate the exact case from the task: read tool with string line
+        // numbers
         let fixture = json!({
             "path": "/Users/amit/code-forge/crates/forge_main/src/ui.rs",
             "start_line": "2255",
@@ -598,8 +599,8 @@ mod tests {
         let fixture = json!({"value": "2.14"});
         let schema = schema_for!(IntOrNull);
         let actual = coerce_to_schema(fixture, &schema);
-        // The anyOf schema tries each subschema; since "2.14" can't be parsed as i64,
-        // it returns the original value
+        // The anyOf schema tries each subschema; since "2.14" can't be parsed
+        // as i64, it returns the original value
         let expected = json!({"value": "2.14"});
         assert_eq!(actual, expected);
     }
@@ -626,7 +627,8 @@ mod tests {
 
     #[test]
     fn test_array_with_tuple_schema_extra_items() {
-        // Test that Vec<serde_json::Value> doesn't coerce items (no type constraints)
+        // Test that Vec<serde_json::Value> doesn't coerce items (no type
+        // constraints)
         let fixture = json!({"items": ["1", "2", "3", "4"]});
         let schema = schema_for!(ExtraItemsData);
         let actual = coerce_to_schema(fixture, &schema);

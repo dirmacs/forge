@@ -140,7 +140,8 @@ impl<F: EnvironmentInfra + FileReaderInfra + FileWriterInfra + HttpInfra>
                 continue;
             }
 
-            // Try to create configured template provider, fallback to unconfigured
+            // Try to create configured template provider, fallback to
+            // unconfigured
             let provider_entry = if let Ok(provider) = self.create_provider(&config).await {
                 Some(provider.into())
             } else if let Ok(provider) = self.create_unconfigured_provider(&config) {
@@ -184,8 +185,8 @@ impl<F: EnvironmentInfra + FileReaderInfra + FileWriterInfra + HttpInfra>
         let has_anthropic_url = self.infra.get_env_var("ANTHROPIC_URL").is_some();
 
         for config in configs {
-            // Skip Forge provider and ContextEngine providers - they're not configurable
-            // via env like other providers
+            // Skip Forge provider and ContextEngine providers - they're not
+            // configurable via env like other providers
             if config.id == ProviderId::FORGE || config.provider_type == ProviderType::ContextEngine
             {
                 continue;
@@ -306,11 +307,13 @@ impl<F: EnvironmentInfra + FileReaderInfra + FileWriterInfra + HttpInfra>
     ) -> anyhow::Result<forge_domain::ProviderTemplate> {
         // Handle special cases first
         if id == ProviderId::FORGE {
-            // Forge provider isn't typically configured via env vars in the registry
+            // Forge provider isn't typically configured via env vars in the
+            // registry
             return Err(Error::provider_not_available(ProviderId::FORGE).into());
         }
 
-        // Look up provider from cached providers - return configured template providers
+        // Look up provider from cached providers - return configured template
+        // providers
         self.get_providers()
             .await
             .iter()
@@ -1006,7 +1009,8 @@ mod env_tests {
             })
             .unwrap();
 
-        // Regular OpenAI and Anthropic providers return template URLs (not rendered)
+        // Regular OpenAI and Anthropic providers return template URLs (not
+        // rendered)
         assert_eq!(
             openai_provider.url.template,
             "https://api.openai.com/v1/chat/completions"

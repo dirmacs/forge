@@ -162,8 +162,10 @@ impl IntoDomain for BoxStream<oai::ResponseStreamEvent, anyhow::Error> {
                                             (tool_call_id.clone(), tool_name.clone()),
                                         );
 
-                                        // Only emit if we have non-empty initial arguments.
-                                        // Otherwise, wait for deltas or done event.
+                                        // Only emit if we have non-empty
+                                        // initial arguments.
+                                        // Otherwise, wait for deltas or done
+                                        // event.
                                         if !call.arguments.is_empty() {
                                             Some(Ok(ChatCompletionMessage::default()
                                                 .add_tool_call(ToolCall::Part(ToolCallPart {
@@ -176,7 +178,8 @@ impl IntoDomain for BoxStream<oai::ResponseStreamEvent, anyhow::Error> {
                                         }
                                     }
                                     oai::OutputItem::Reasoning(_reasoning) => {
-                                        // Reasoning items don't emit content in real-time, only at
+                                        // Reasoning items don't emit content in
+                                        // real-time, only at
                                         // completion
                                         None
                                     }
@@ -209,11 +212,13 @@ impl IntoDomain for BoxStream<oai::ResponseStreamEvent, anyhow::Error> {
                                 )))
                             }
                             oai::ResponseStreamEvent::ResponseFunctionCallArgumentsDone(_done) => {
-                                // Arguments are already sent via deltas, no need to emit here
+                                // Arguments are already sent via deltas, no
+                                // need to emit here
                                 None
                             }
                             oai::ResponseStreamEvent::ResponseCompleted(done) => {
-                                // Text content, reasoning, and tool calls were already streamed via
+                                // Text content, reasoning, and tool calls were
+                                // already streamed via
                                 // delta events Only emit metadata
                                 // (usage, finish_reason)
                                 let mut message: ChatCompletionMessage =
@@ -225,7 +230,8 @@ impl IntoDomain for BoxStream<oai::ResponseStreamEvent, anyhow::Error> {
                                 Some(Ok(message))
                             }
                             oai::ResponseStreamEvent::ResponseIncomplete(done) => {
-                                // Text content, reasoning, and tool calls were already streamed via
+                                // Text content, reasoning, and tool calls were
+                                // already streamed via
                                 // delta events
                                 let mut message: ChatCompletionMessage =
                                     done.response.into_domain();
@@ -1108,7 +1114,8 @@ mod tests {
         let delta3_msg = messages[2].as_ref().unwrap();
         assert_eq!(delta3_msg.content, Some(Content::part("</commit_message>")));
 
-        // Completion event should have NO content (cleared to avoid duplication)
+        // Completion event should have NO content (cleared to avoid
+        // duplication)
         let completion_msg = messages[3].as_ref().unwrap();
         assert_eq!(completion_msg.content, None);
         assert_eq!(completion_msg.finish_reason, Some(FinishReason::Stop));
@@ -1118,12 +1125,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_stream_avoids_duplicate_reasoning_in_completion() -> anyhow::Result<()> {
-        // Simulate realistic streaming: reasoning deltas followed by completion event
+        // Simulate realistic streaming: reasoning deltas followed by completion
+        // event
         let reasoning_delta1 = fixture_delta_reasoning_text("Analyzing the request...");
         let reasoning_delta2 = fixture_delta_reasoning_text(" and formulating response.");
         let summary_delta = fixture_delta_reasoning_summary("Summary of analysis");
 
-        // Completion event contains the full reasoning that was already streamed
+        // Completion event contains the full reasoning that was already
+        // streamed
         let response = fixture_response_with_reasoning_both(
             "Analyzing the request... and formulating response.",
             "Summary of analysis",
@@ -1175,8 +1184,8 @@ mod tests {
         );
         assert!(summary_msg.reasoning_details.is_some());
 
-        // Completion event should have NO reasoning or reasoning_details (cleared to
-        // avoid duplication)
+        // Completion event should have NO reasoning or reasoning_details
+        // (cleared to avoid duplication)
         let completion_msg = messages[3].as_ref().unwrap();
         assert_eq!(completion_msg.reasoning, None);
         assert_eq!(completion_msg.reasoning_details, None);
@@ -1187,12 +1196,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_stream_avoids_duplicate_tool_calls_in_completion() -> anyhow::Result<()> {
-        // Simulate realistic streaming: tool call deltas followed by completion event
+        // Simulate realistic streaming: tool call deltas followed by completion
+        // event
         let added = fixture_function_call_added("call_123", "shell", "");
         let delta1 = fixture_function_call_arguments_delta(0, r#"{"cmd":"echo"#);
         let delta2 = fixture_function_call_arguments_delta(0, r#" hello"}"#);
 
-        // Completion event contains the full tool call that was already streamed
+        // Completion event contains the full tool call that was already
+        // streamed
         let response =
             fixture_response_with_function_call("call_123", "shell", r#"{"cmd":"echo hello"}"#);
         let completed = oai::ResponseCompletedEvent { sequence_number: 4, response };
@@ -1221,7 +1232,8 @@ mod tests {
         let delta2_msg = messages[1].as_ref().unwrap();
         assert_eq!(delta2_msg.tool_calls.len(), 1);
 
-        // Completion event should have NO tool calls (cleared to avoid duplication)
+        // Completion event should have NO tool calls (cleared to avoid
+        // duplication)
         let completion_msg = messages[2].as_ref().unwrap();
         assert_eq!(completion_msg.tool_calls.len(), 0);
         assert_eq!(completion_msg.finish_reason, Some(FinishReason::ToolCalls));

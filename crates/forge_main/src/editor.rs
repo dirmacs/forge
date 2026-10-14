@@ -28,8 +28,8 @@ pub enum ReadResult {
 impl ForgeEditor {
     fn init() -> reedline::Keybindings {
         let mut keybindings = default_emacs_keybindings();
-        // on TAB press shows the completion menu, and if we've exact match it will
-        // insert it
+        // on TAB press shows the completion menu, and if we've exact match it
+        // will insert it
         keybindings.add_binding(
             KeyModifiers::NONE,
             KeyCode::Tab,

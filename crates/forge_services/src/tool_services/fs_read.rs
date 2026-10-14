@@ -113,7 +113,8 @@ impl<F: FileInfoInfra + EnvironmentInfra + InfraFsReadService> FsReadService for
         assert_absolute_path(path)?;
         let env = self.0.get_environment();
 
-        // Validate with the larger limit initially since we don't know file type yet
+        // Validate with the larger limit initially since we don't know file
+        // type yet
         let initial_size_limit = env.max_file_size.max(env.max_image_size);
         assert_file_size(&*self.0, path, initial_size_limit).await?;
 

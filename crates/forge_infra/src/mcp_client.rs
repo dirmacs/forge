@@ -106,7 +106,8 @@ impl ForgeMcpClient {
 
                 cmd.args(&stdio.args).kill_on_drop(true);
 
-                // Use builder pattern to capture and ignore stderr to silence MCP logs
+                // Use builder pattern to capture and ignore stderr to silence
+                // MCP logs
                 let (transport, _stderr) = TokioChildProcess::builder(cmd)
                     .stderr(std::process::Stdio::piped())
                     .spawn()?;
@@ -264,7 +265,7 @@ fn resolve_http_templates(
     let template_data = serde_json::json!({"env": env_vars});
 
     // Resolve templates in headers
-    for (_, value) in http.headers.iter_mut() {
+    for value in http.headers.values_mut() {
         // Try to render the template, but keep original value if it fails
         if let Ok(resolved) = handlebars.render_template(value, &template_data) {
             *value = resolved;

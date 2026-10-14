@@ -52,8 +52,8 @@ impl<F: FileInfoInfra + EnvironmentInfra + forge_app::FileReaderInfra> ImageRead
         assert_absolute_path(path)?;
         let env = self.0.get_environment();
 
-        // Validate file size before reading content using image-specific file size
-        // limit
+        // Validate file size before reading content using image-specific file
+        // size limit
         crate::tool_services::fs_read::assert_file_size(&*self.0, path, env.max_image_size)
             .await
             .with_context(

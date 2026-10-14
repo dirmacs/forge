@@ -374,7 +374,8 @@ impl JsonRepairParser {
                 // end of text, missing end quote
                 let i_prev = self.prev_non_whitespace_index(self.i - 1);
                 if !stop_at_delimiter && self.is_delimiter(self.chars.get(i_prev).copied()) {
-                    // retry parsing the string, stopping at the first next delimiter
+                    // retry parsing the string, stopping at the first next
+                    // delimiter
                     self.i = i_before;
                     self.output.truncate(o_before);
                     return self.parse_string(true, None);
@@ -471,7 +472,8 @@ impl JsonRepairParser {
                             self.i += 2;
                         }
                         ',' if skip_escape_chars => {
-                            // Special case: escaped comma in escaped string should be treated as
+                            // Special case: escaped comma in escaped string
+                            // should be treated as
                             // delimiter This creates a new array element
                             str_content =
                                 self.insert_before_last_whitespace_str(&str_content, "\"");

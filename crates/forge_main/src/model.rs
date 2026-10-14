@@ -61,8 +61,8 @@ impl Display for CliProvider {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // Use fixed width for alignment
         // Format: "✓ " + name_padded + " [" + domain + "]"
-        // Longest built-in provider display name is "AnthropicCompatible" (20 chars)
-        // But we use 19 to account for the space before "["
+        // Longest built-in provider display name is "AnthropicCompatible" (20
+        // chars) But we use 19 to account for the space before "["
         let name_width = ProviderId::built_in_providers()
             .iter()
             .map(|id| id.to_string().len())
@@ -200,7 +200,8 @@ impl ForgeCommandManager {
     pub fn register_all(&self, commands: Vec<forge_domain::Command>) {
         let mut guard = self.commands.lock().unwrap();
 
-        // Remove existing workflow commands (those with ⚙ prefix in description)
+        // Remove existing workflow commands (those with ⚙ prefix in
+        // description)
         guard.retain(|cmd| !cmd.description.starts_with("⚙ "));
 
         // Add new workflow commands
@@ -330,7 +331,8 @@ impl ForgeCommandManager {
             return Ok(SlashCommand::Message(input.to_string()));
         }
 
-        // TODO: Can leverage Clap to parse commands and provide correct error messages
+        // TODO: Can leverage Clap to parse commands and provide correct error
+        // messages
         match command {
             "/compact" => Ok(SlashCommand::Compact),
             "/new" => Ok(SlashCommand::New),

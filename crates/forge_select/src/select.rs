@@ -169,7 +169,8 @@ impl<T: 'static> SelectBuilder<T> {
 
         let theme = ForgeSelect::default_theme();
 
-        // Strip ANSI codes from display strings for better fuzzy search experience
+        // Strip ANSI codes from display strings for better fuzzy search
+        // experience
         let display_options: Vec<String> = self
             .options
             .iter()
@@ -240,7 +241,8 @@ impl<T> SelectBuilderOwned<T> {
         let _cursor_restore_guard = CursorRestoreGuard;
         let theme = ForgeSelect::default_theme();
 
-        // Strip ANSI codes from display strings for better fuzzy search experience
+        // Strip ANSI codes from display strings for better fuzzy search
+        // experience
         let display_options: Vec<String> = self
             .options
             .iter()
@@ -323,7 +325,8 @@ impl InputBuilder {
     /// Returns an error if the terminal interaction fails for reasons other
     /// than user cancellation
     pub fn prompt(self) -> Result<Option<String>> {
-        // Disable bracketed paste mode to prevent ~0 and ~1 markers during input
+        // Disable bracketed paste mode to prevent ~0 and ~1 markers during
+        // input
         let _paste_guard = BracketedPasteGuard::new()?;
         // Disable application cursor keys to ensure arrow keys work correctly
         let _cursor_keys_guard = ApplicationCursorKeysGuard::new()?;

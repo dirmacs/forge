@@ -454,7 +454,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
                     // Read only the scope-specific config (not merged)
                     let mut scope_config = self.api.read_mcp_config(Some(&scope)).await?;
 
-                    // Merge the incoming servers with scope-specific config only
+                    // Merge the incoming servers with scope-specific config
+                    // only
                     let mut added_servers = Vec::new();
                     for (server_name, server_config) in incoming_config.mcp_servers {
                         scope_config
@@ -565,7 +566,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
                         // Execute the custom command
                         self.init_state(false).await?;
 
-                        // If conversation_id is provided, set it in CLI before initializing
+                        // If conversation_id is provided, set it in CLI before
+                        // initializing
                         if let Some(ref cid) = run_group.conversation_id {
                             self.cli.conversation_id = Some(*cid);
                         }
@@ -1686,7 +1688,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
                 .map(|t| t.to_string())
                 .unwrap_or_else(|| markers::EMPTY.to_string());
 
-            // Format time using humantime library (same as conversation_selector.rs)
+            // Format time using humantime library (same as
+            // conversation_selector.rs)
             let duration = chrono::Utc::now().signed_duration_since(
                 conv.metadata.updated_at.unwrap_or(conv.metadata.created_at),
             );
@@ -1698,7 +1701,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
                 format!("{} ago", humantime::format_duration(duration))
             };
 
-            // Add conversation: Title=<title>, Updated=<time_ago>, with ID as section title
+            // Add conversation: Title=<title>, Updated=<time_ago>, with ID as
+            // section title
             info = info
                 .add_title(conv.id)
                 .add_key_value("Title", title)
@@ -1869,7 +1873,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
                 self.on_index(working_dir, 100).await?;
             }
             SlashCommand::AgentSwitch(agent_id) => {
-                // Validate that the agent exists by checking against loaded agents
+                // Validate that the agent exists by checking against loaded
+                // agents
                 let agents = self.api.get_agents().await?;
                 let agent_exists = agents.iter().any(|agent| agent.id.as_str() == agent_id);
 
@@ -1913,8 +1918,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
             self.on_provider_selection().await?;
 
             // Check if a model was already selected during provider activation
-            // Return None to signal the model selection is complete and message was already
-            // printed
+            // Return None to signal the model selection is complete and message
+            // was already printed
             if self.api.get_default_model().await.is_some() {
                 return Ok(None);
             }
@@ -1984,7 +1989,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
             .collect::<anyhow::Result<HashMap<_, _>>>()?;
 
         let input = if let Some(default_key) = &request.api_key {
-            // ApiKey's Display shows masked version, AsRef<str> gives actual value
+            // ApiKey's Display shows masked version, AsRef<str> gives actual
+            // value
             ForgeSelect::input(format!("Enter your {provider_id} API key:"))
                 .with_default(default_key)
         } else {
@@ -2026,7 +2032,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
             "→".blue(),
             display_uri.blue().underline()
         ))?;
-        // Try to copy code to clipboard automatically (not available on Android)
+        // Try to copy code to clipboard automatically (not available on
+        // Android)
         #[cfg(not(target_os = "android"))]
         let clipboard_copied = arboard::Clipboard::new()
             .and_then(|mut clipboard| clipboard.set_text(user_code))
@@ -2352,7 +2359,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
     /// Activates a provider by configuring it if needed, setting it as default,
     /// and ensuring a compatible model is selected.
     async fn activate_provider(&mut self, any_provider: AnyProvider) -> Result<()> {
-        // Trigger authentication for the selected provider only if not configured
+        // Trigger authentication for the selected provider only if not
+        // configured
         let provider = if !any_provider.is_configured() {
             match self
                 .configure_provider(any_provider.id(), any_provider.auth_methods().to_vec())
@@ -2490,7 +2498,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
 
     /// Initialize the state of the UI
     async fn init_state(&mut self, first: bool) -> Result<Workflow> {
-        // Run the independent initialization tasks in parallel for better performance
+        // Run the independent initialization tasks in parallel for better
+        // performance
         let workflow = self.api.read_workflow(self.cli.workflow.as_deref()).await?;
 
         let _ = self.handle_migrate_credentials().await;
@@ -2505,19 +2514,21 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
         }
 
         // Validate provider is configured before loading agents
-        // If provider is set in config but not configured (no credentials), prompt user
-        // to login
+        // If provider is set in config but not configured (no credentials),
+        // prompt user to login
         if self.api.get_default_provider().await.is_err() {
             self.on_provider_selection().await?;
         }
 
         if first {
-            // Create base workflow and trigger updates if this is the first initialization
+            // Create base workflow and trigger updates if this is the first
+            // initialization
             let mut base_workflow = Workflow::default();
             base_workflow.merge(workflow.clone());
-            // For chat, we are trying to get active agent or setting it to default.
-            // So for default values, `/info` doesn't show active provider, model, etc.
-            // So my default, on new, we should set the active agent.
+            // For chat, we are trying to get active agent or setting it to
+            // default. So for default values, `/info` doesn't show
+            // active provider, model, etc. So my default, on new,
+            // we should set the active agent.
             self.api
                 .set_active_agent(active_agent.clone().unwrap_or_default())
                 .await?;
@@ -2575,17 +2586,17 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
             None => Event::empty(),
         };
 
-        // Only use CLI piped_input as additional context when BOTH --prompt and piped
-        // input are provided. This handles the case: `echo "context" | forge -p
-        // "question"` where piped input provides context and --prompt provides
-        // the actual question.
+        // Only use CLI piped_input as additional context when BOTH --prompt and
+        // piped input are provided. This handles the case: `echo
+        // "context" | forge -p "question"` where piped input provides
+        // context and --prompt provides the actual question.
         //
-        // When only piped input is provided (no --prompt), it's already used as the
-        // main content (passed via the `content` parameter). We must NOT add it again
-        // as additional_context, otherwise the input appears twice in the
-        // conversation. We detect this by checking if cli.prompt exists - if it
-        // does, the content came from --prompt and piped input should be
-        // additional context.
+        // When only piped input is provided (no --prompt), it's already used as
+        // the main content (passed via the `content` parameter). We
+        // must NOT add it again as additional_context, otherwise the
+        // input appears twice in the conversation. We detect this by
+        // checking if cli.prompt exists - if it does, the content came
+        // from --prompt and piped input should be additional context.
         let piped_input = self.cli.piped_input.clone();
         let has_explicit_prompt = self.cli.prompt.is_some();
         if let Some(piped) = piped_input
@@ -2604,7 +2615,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
     async fn on_chat(&mut self, chat: ChatRequest) -> Result<()> {
         let mut stream = self.api.chat(chat).await?;
 
-        // Create content writer - streaming or direct based on environment config
+        // Create content writer - streaming or direct based on environment
+        // config
         let mut writer = if self.api.environment().streaming_output {
             ContentWriter::streaming(self.spinner.clone(), self.api.clone())
         } else {
@@ -2656,7 +2668,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
                         // No related conversations, just render the main one
                         conversation.to_html()
                     } else {
-                        // Render main conversation with related conversations in the same HTML
+                        // Render main conversation with related conversations
+                        // in the same HTML
                         conversation.to_html_with_related(&related_conversations)
                     };
 
@@ -2749,7 +2762,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
                 }
             }
             ChatResponse::ToolCallEnd(toolcall_result) => {
-                // Only track toolcall name in case of success else track the error.
+                // Only track toolcall name in case of success else track the
+                // error.
                 let payload = if toolcall_result.is_error() {
                     let mut r = ToolCallPayload::new(toolcall_result.name.to_string());
                     if let Some(cause) = toolcall_result.output.as_str() {
@@ -2972,8 +2986,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
 
     fn trace_user(&self) {
         let api = self.api.clone();
-        // NOTE: Spawning required so that we don't block the user while querying user
-        // info
+        // NOTE: Spawning required so that we don't block the user while
+        // querying user info
         tokio::spawn(async move {
             if let Ok(Some(user_info)) = api.user_info().await {
                 tracker::login(user_info.auth_provider_id.into_string());
@@ -3010,7 +3024,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
 
                 // Get the provider
                 let provider = self.api.get_provider(&provider_id).await?;
-                // Activate the provider (will configure if needed and set as default)
+                // Activate the provider (will configure if needed and set as
+                // default)
                 self.activate_provider(provider).await?;
             }
             ConfigField::Model => {
@@ -3076,7 +3091,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
             }
         });
 
-        // Check if nerd fonts should be used (NERD_FONT or USE_NERD_FONT set to "1")
+        // Check if nerd fonts should be used (NERD_FONT or USE_NERD_FONT set to
+        // "1")
         let use_nerd_font = std::env::var("NERD_FONT")
             .or_else(|_| std::env::var("USE_NERD_FONT"))
             .map(|val| val == "1")
@@ -3289,7 +3305,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
                     self.spinner.stop(None)?;
                 }
 
-                // Get active workspace ID if current workspace info is available
+                // Get active workspace ID if current workspace info is
+                // available
                 let current_workspace = current_workspace_result.ok().flatten();
                 let active_workspace_id = current_workspace.as_ref().map(|ws| &ws.workspace_id);
 
@@ -3303,7 +3320,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
 
                 // Output based on mode
                 if porcelain {
-                    // Skip header row in porcelain mode (consistent with conversation list)
+                    // Skip header row in porcelain mode (consistent with
+                    // conversation list)
                     self.writeln(Porcelain::from(info).skip(1).drop_cols(&[0, 4, 5]))?;
                 } else {
                     self.writeln(info)?;
@@ -3332,7 +3350,8 @@ impl<A: API + ConsoleWriter + 'static, F: Fn() -> A + Send + Sync> UI<A, F> {
 
         match workspace {
             Some(workspace) => {
-                // When viewing a specific workspace's info, it's implicitly the active one
+                // When viewing a specific workspace's info, it's implicitly the
+                // active one
                 let mut info = Self::format_workspace_info(&workspace, true);
 
                 // Add sync status summary if available

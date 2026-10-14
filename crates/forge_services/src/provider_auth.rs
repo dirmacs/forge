@@ -129,7 +129,8 @@ where
                                     },
                                 )?;
 
-                            // Get required params (only used for API key, but needed for factory)
+                            // Get required params (only used for API key, but
+                            // needed for factory)
                             let required_params = if matches!(auth_method, AuthMethod::ApiKey) {
                                 provider.url_params.clone()
                             } else {
@@ -154,7 +155,8 @@ where
                                             continue;
                                         }
 
-                                        // Update provider with refreshed credential
+                                        // Update provider with refreshed
+                                        // credential
                                         provider.credential = Some(refreshed);
                                         break; // Success, stop trying other methods
                                     }

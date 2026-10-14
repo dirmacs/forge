@@ -76,26 +76,27 @@ impl<F: EnvironmentInfra + FileReaderInfra + FileWriterInfra> AppConfigRepositor
         if let Some(ref provider_id) = provider {
             config.provider = Some(provider_id.clone());
 
-            // If we have both provider and model overrides, ensure the model is set for
-            // this provider
+            // If we have both provider and model overrides, ensure the model is
+            // set for this provider
             if let Some(ref model_id) = model {
                 config.model.insert(provider_id.clone(), model_id.clone());
             }
         }
 
-        // If only model override (no provider override), update existing provider
-        // models
+        // If only model override (no provider override), update existing
+        // provider models
         if provider.is_none()
             && let Some(model_id) = model
         {
             if config.model.is_empty() {
-                // If no models configured but we have a default provider, set the model for it
+                // If no models configured but we have a default provider, set
+                // the model for it
                 if let Some(ref default_provider) = config.provider {
                     config.model.insert(default_provider.clone(), model_id);
                 }
             } else {
                 // Update all existing provider models
-                for (_, mut_model_id) in config.model.iter_mut() {
+                for mut_model_id in config.model.values_mut() {
                     *mut_model_id = model_id.clone();
                 }
             }
@@ -113,7 +114,8 @@ impl<F: EnvironmentInfra + FileReaderInfra + FileWriterInfra + Send + Sync> AppC
         // Check cache first
         let cache = self.cache.lock().await;
         if let Some(ref cached_config) = *cache {
-            // Apply overrides even to cached config since overrides can change via env vars
+            // Apply overrides even to cached config since overrides can change
+            // via env vars
             return Ok(self.apply_overrides(cached_config.clone()));
         }
         drop(cache);

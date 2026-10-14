@@ -73,7 +73,8 @@ impl<S: AgentService> Orchestrator<S> {
             .collect::<HashSet<_>>();
 
         for tool_call in tool_calls {
-            // Send the start notification for system tools and not agent as a tool
+            // Send the start notification for system tools and not agent as a
+            // tool
             let is_system_tool = system_tools.contains(&tool_call.name);
             if is_system_tool {
                 self.send(ChatResponse::ToolCallStart(tool_call.clone()))
@@ -96,13 +97,15 @@ impl<S: AgentService> Orchestrator<S> {
                 );
             }
 
-            // Send the end notification for system tools and not agent as a tool
+            // Send the end notification for system tools and not agent as a
+            // tool
             if is_system_tool {
                 self.send(ChatResponse::ToolCallEnd(tool_result.clone()))
                     .await?;
             }
             // Ensure all tool calls and results are recorded
-            // Adding task completion records is critical for compaction to work correctly
+            // Adding task completion records is critical for compaction to work
+            // correctly
             tool_call_records.push((tool_call.clone(), tool_result));
         }
 
@@ -214,7 +217,8 @@ impl<S: AgentService> Orchestrator<S> {
         // Create agent reference for the rest of the method
         let agent = &self.agent;
 
-        // Signals that the loop should suspend (task may or may not be completed)
+        // Signals that the loop should suspend (task may or may not be
+        // completed)
         let mut should_yield = false;
 
         // Signals that the task is completed
@@ -256,10 +260,10 @@ impl<S: AgentService> Orchestrator<S> {
                 }),
             ).await?;
 
-            // TODO: Add a unit test in orch spec, to guarantee that compaction is
-            // triggered after receiving the response Trigger compaction after
-            // making a request NOTE: Ideally compaction should be implemented
-            // as a transformer
+            // TODO: Add a unit test in orch spec, to guarantee that compaction
+            // is triggered after receiving the response Trigger
+            // compaction after making a request NOTE: Ideally
+            // compaction should be implemented as a transformer
             if let Some(c_context) = self.check_and_compact(&context)? {
                 info!(agent_id = %agent.id, "Using compacted context from execution");
                 context = c_context;
@@ -280,8 +284,8 @@ impl<S: AgentService> Orchestrator<S> {
 
             debug!(agent_id = %agent.id, tool_call_count = message.tool_calls.len(), "Tool call count");
 
-            // Turn is completed, if finish_reason is 'stop'. Gemini models return stop as
-            // finish reason with tool calls.
+            // Turn is completed, if finish_reason is 'stop'. Gemini models
+            // return stop as finish reason with tool calls.
             is_complete =
                 message.finish_reason == Some(FinishReason::Stop) && message.tool_calls.is_empty();
 
@@ -292,10 +296,12 @@ impl<S: AgentService> Orchestrator<S> {
                     .iter()
                     .any(|call| ToolCatalog::should_yield(&call.name));
 
-            // NOTE: Content and reasoning are now streamed via into_full_streaming,
-            // so we don't need to send them here again. The streaming happens during
-            // the LLM response collection, providing real-time output to the user.
-            // However, when streaming is disabled, we need to send the full content here.
+            // NOTE: Content and reasoning are now streamed via
+            // into_full_streaming, so we don't need to send them
+            // here again. The streaming happens during
+            // the LLM response collection, providing real-time output to the
+            // user. However, when streaming is disabled, we need to
+            // send the full content here.
             if !self.environment.streaming_output {
                 if let Some(reasoning) = message.reasoning.as_ref()
                     && context.is_reasoning_supported()
@@ -322,7 +328,8 @@ impl<S: AgentService> Orchestrator<S> {
             for (_, result) in tool_call_records.iter_mut() {
                 if result.is_error() {
                     let attempts_left = self.error_tracker.remaining_attempts(&result.name);
-                    // Add attempt information to the error message so the agent can reflect on it.
+                    // Add attempt information to the error message so the agent
+                    // can reflect on it.
                     let context = serde_json::json!({
                         "attempts_left": attempts_left,
                         "allowed_max_attempts": allowed_max_attempts,

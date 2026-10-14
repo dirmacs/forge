@@ -174,8 +174,7 @@ impl ContextMessage {
         reasoning_details: Option<Vec<ReasoningFull>>,
         tool_calls: Option<Vec<ToolCallFull>>,
     ) -> Self {
-        let tool_calls =
-            tool_calls.and_then(|calls| if calls.is_empty() { None } else { Some(calls) });
+        let tool_calls = tool_calls.filter(|calls| !calls.is_empty());
         TextMessage {
             role: Role::Assistant,
             content: content.to_string(),
@@ -575,7 +574,8 @@ impl Context {
     /// Checks if reasoning is enabled by user or not.
     pub fn is_reasoning_supported(&self) -> bool {
         self.reasoning.as_ref().is_some_and(|reasoning| {
-            // When enabled parameter is defined then return it's value directly.
+            // When enabled parameter is defined then return it's value
+            // directly.
             if reasoning.enabled.is_some() {
                 return reasoning.enabled.unwrap_or_default();
             }
@@ -750,7 +750,8 @@ mod tests {
         let token_count = estimate_token_count(context.to_text().len());
 
         // Validate the token count is reasonable
-        // The exact value will depend on the implementation of estimate_token_count
+        // The exact value will depend on the implementation of
+        // estimate_token_count
         assert!(token_count > 0, "Token count should be greater than 0");
     }
 
@@ -938,8 +939,8 @@ mod tests {
         let fixture = Context::default().messages(vec![wrapper]);
         assert_eq!(fixture.token_count(), TokenCount::Actual(80));
 
-        // case 4: context with messages - since total_tokens are not present return
-        // estimate
+        // case 4: context with messages - since total_tokens are not present
+        // return estimate
         let fixture = Context::default()
             .add_message(ContextMessage::user("Hello", None))
             .add_message(ContextMessage::assistant("Hi there!", None, None))
@@ -970,8 +971,8 @@ mod tests {
 
         let actual = fixture.token_count();
 
-        // Expected: Should use the LAST message's usage (300), not the first (100) or
-        // second (200)
+        // Expected: Should use the LAST message's usage (300), not the first
+        // (100) or second (200)
         let expected = TokenCount::Actual(300);
 
         assert_eq!(actual, expected);
@@ -1228,8 +1229,8 @@ mod tests {
                 },
             ]);
 
-        // Test total messages (6 messages: 1 system + 2 user + 2 assistant + 2 tool
-        // results)
+        // Test total messages (6 messages: 1 system + 2 user + 2 assistant + 2
+        // tool results)
         assert_eq!(fixture.total_messages(), 7);
 
         // Test user message count
@@ -1244,8 +1245,9 @@ mod tests {
 
     #[test]
     fn test_directory_listing_sorted_dirs_first() {
-        // Create entries already sorted (as they would come from attachment service)
-        // Directories first, then files, all sorted alphabetically
+        // Create entries already sorted (as they would come from attachment
+        // service) Directories first, then files, all sorted
+        // alphabetically
         let fixture_attachments = vec![Attachment {
             path: "/test/root".to_string(),
             content: AttachmentContent::DirectoryListing {
@@ -1335,9 +1337,10 @@ mod tests {
         let fixture = ContextMessage::assistant("Let me help", None, Some(fixture_tool_calls));
         let actual = fixture.token_count_approx();
         // Content: "Let me help" = 11 chars
-        // Tool call 1: "fs_search" (9 chars) + {"query":"test"} (16 chars) = 25 chars
-        // Tool call 2: "calculate" (9 chars) + {"expression":"2+2"} (20 chars) = 29
-        // chars Total: 11 + 25 + 29 = 65 chars / 4 = 17 tokens
+        // Tool call 1: "fs_search" (9 chars) + {"query":"test"} (16 chars) = 25
+        // chars Tool call 2: "calculate" (9 chars) +
+        // {"expression":"2+2"} (20 chars) = 29 chars Total: 11 + 25 +
+        // 29 = 65 chars / 4 = 17 tokens
         let expected = 17;
         assert_eq!(actual, expected);
     }

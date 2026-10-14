@@ -23,7 +23,8 @@ impl<F: FileWriterInfra + FileReaderInfra> ForgeWorkflowService<F> {
     /// none is found.
     pub async fn resolve_path(&self, path: Option<PathBuf>) -> PathBuf {
         let path = path.unwrap_or(PathBuf::from("."));
-        // If the path exists or this is an explicitly provided path, return it as is
+        // If the path exists or this is an explicitly provided path, return it
+        // as is
         if path.exists() || path.to_string_lossy() != "forge.yaml" {
             return path.to_path_buf();
         }
@@ -32,7 +33,8 @@ impl<F: FileWriterInfra + FileReaderInfra> ForgeWorkflowService<F> {
         let mut current_dir = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
         let filename = path.file_name().unwrap_or_default();
 
-        // Start searching for the config in the current directory and its parents
+        // Start searching for the config in the current directory and its
+        // parents
         loop {
             let config_path = current_dir.join(filename);
             if config_path.exists() {
@@ -125,7 +127,8 @@ mod tests {
 
     // Pure function that tests the core logic without filesystem dependencies
     fn find_config_file_logic(path: &Path, existing_config_path: &Path) -> PathBuf {
-        // If the path exists or this is an explicitly provided path, return it as is
+        // If the path exists or this is an explicitly provided path, return it
+        // as is
         if path.exists() || path.to_string_lossy() != "forge.yaml" {
             return path.to_path_buf();
         }
